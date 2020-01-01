@@ -5,7 +5,7 @@ import re
 from datetime import datetime
 
 _title = 'PDF-Merger'
-_version = '0.2'
+_version = '0.3'
 program_title = f'{_title} V{_version}'
 selected_folder = None
 filter_text = None
@@ -18,12 +18,12 @@ entry_filter_text = None
 def on_button_open_folder_clicked():
     global selected_folder, entry_filter_text, button_merge_files
     folder = None
-    while folder == None or folder == '':
-        folder = filedialog.askdirectory(initialdir=getcwd())
-    selected_folder.set(folder)
-    on_filter_text_changed()
-    button_merge_files.configure(state='normal')
-    entry_filter_text.configure(state='normal')
+    folder = filedialog.askdirectory(initialdir=getcwd())
+    if folder != None and folder != '':
+        selected_folder.set(folder)
+        on_filter_text_changed()
+        button_merge_files.configure(state='normal')
+        entry_filter_text.configure(state='normal')
 
 def on_button_merge_files_clicked():
     global filtered_and_sorted_files
@@ -55,11 +55,16 @@ def get_all_pdf_files_in_folder(folderpath):
 def filter_and_sort_files(filter_text, files):
     pre_filtered_files = [file for file in files if filter_text in file] if filter_text != '' else files
     output = []
-    pattern = re.compile(r'(19\d\d|20\d\d)[.-_]?(\d\d)[.-_]?(\d\d)')
+    #pattern = re.compile(r'(19\d\d|20\d\d)[.-_]?(\d\d)[.-_]?(\d\d)?')
+    pattern = re.compile(r'(19\d\d|20\d\d)[.-_-]?(\d{1,2})[.-_-]?(\d{0,2})')
     for file in pre_filtered_files:
-        match = re.search(pattern, file)
+        print(str(file))
+        match = re.search(pattern=pattern, string=str(file))
         if match:
-            output.append((datetime(year=int(match[1]), month=int(match[2]), day=int(match[3])), file))
+            print('xxx')
+            print(match.groups())
+            print('xxx')
+            output.append((datetime(year=int(match[1]), month=int(match[2]), day=int(match[3]) if match[3]!='' else 1), file))
     output.sort(key=lambda tup: tup[0])
     return output
 
